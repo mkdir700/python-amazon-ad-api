@@ -35,6 +35,9 @@ class Reports(Client):
 
         Keyword Args
             | path **reportId** (string): [required] The report identifier.
+        
+        Request body
+            | **creativeType** (string): [optional] Set to `video` to retrieve a Sponsored Brands video report.
 
         Returns:
             ApiResponse

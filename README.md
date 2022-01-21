@@ -98,7 +98,7 @@ back to `%HOME%\AppData\Roaming` if undefined
 * Insights
 
 
-### Modules Available Sponsored Products
+### Modules Available Sponsored Products 2.0
 
 * Ad Groups
 * Bid Recommendations
@@ -112,6 +112,17 @@ back to `%HOME%\AppData\Roaming` if undefined
 * Campaign Negative Keywords
 * Reports
 * Snapshots
+
+### Modules Available Sponsored Products 3.0
+
+
+* Budget Rules
+* Campaign Optimization Rules
+* Ranked Keywords Recommendations
+* Product Targeting
+* Budget Recommendations
+* Budget Rules Recommendations
+* Product Recommendations
 
 
 ### Modules Available Sponsored Brands
@@ -129,11 +140,19 @@ back to `%HOME%\AppData\Roaming` if undefined
 * Media
 * Brands
 * Moderation
+* Reports
 
 ### Modules Available Sponsored Display
 
 * Campaigns
 * Ad Groups
+* Reports
+* Product Ads
+* Targets
+* Negative Targets
+* Targets Recommendations
+* Bid Recommendations
+* Creatives
 
 
 ### Example Usage Campaigns

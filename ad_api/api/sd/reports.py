@@ -46,7 +46,7 @@ class Reports(Client):
 
         Keyword Args
             | path **reportId** (string): [required] The report identifier.
-
+        
         Returns:
             ApiResponse
         """

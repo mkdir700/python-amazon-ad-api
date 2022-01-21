@@ -22,13 +22,7 @@ class AWS_ENV(Enum):
 
 class Marketplaces(Enum):
     # North America
-    NA = {
-        'sandbox': 'advertising-api-test.amazon.com',
-        'prod': 'advertising-api.amazon.com',
-        'currency': 'USD',
-        'token_url': 'api.amazon.com/auth/o2/token'
-    }
-    US = {
+    NA = US = {
         'sandbox': 'advertising-api-test.amazon.com',
         'prod': 'advertising-api.amazon.com',
         'currency': 'USD',
@@ -46,6 +40,12 @@ class Marketplaces(Enum):
         'currency': 'MXN',
         'token_url': 'api.amazon.com/auth/o2/token'
     }
+    BR = {
+        'sandbox': 'advertising-api-test.amazon.com',
+        'prod': 'advertising-api.amazon.com',
+        'currency': 'BRL',
+        'token_url': 'api.amazon.com/auth/o2/token'
+    }
     # Far East
     JP = {
         'sandbox': 'advertising-api-test.amazon.com',
@@ -59,8 +59,14 @@ class Marketplaces(Enum):
         'currency': 'AUD',
         'token_url': 'api.amazon.co.jp/auth/o2/token'
     }
+    SG = {
+        'sandbox': 'advertising-api-test.amazon.com',
+        'prod': 'advertising-api-fe.amazon.com',
+        'currency': 'SGD',
+        'token_url': 'api.amazon.co.jp/auth/o2/token'
+    }
     # Europe
-    EU = {
+    EU = ES = DE = FR = IT = NL = {
         'sandbox': 'advertising-api-test.amazon.com',
         'prod': 'advertising-api-eu.amazon.com',
         'currency': 'EUR',
@@ -72,45 +78,20 @@ class Marketplaces(Enum):
         'currency': 'GBP',
         'token_url': 'api.amazon.co.uk/auth/o2/token'
     }
-    ES = {
-        'sandbox': 'advertising-api-test.amazon.com',
-        'prod': 'advertising-api-eu.amazon.com',
-        'currency': 'EUR',
-        'token_url': 'api.amazon.co.uk/auth/o2/token'
-    }
-    DE = {
-        'sandbox': 'advertising-api-test.amazon.com',
-        'prod': 'advertising-api-eu.amazon.com',
-        'currency': 'EUR',
-        'token_url': 'api.amazon.co.uk/auth/o2/token'
-    }
-    IT = {
-        'sandbox': 'advertising-api-test.amazon.com',
-        'prod': 'advertising-api-eu.amazon.com',
-        'currency': 'EUR',
-        'token_url': 'api.amazon.co.uk/auth/o2/token'
-    }
-    FR = {
-        'sandbox': 'advertising-api-test.amazon.com',
-        'prod': 'advertising-api-eu.amazon.com',
-        'currency': 'EUR',
-        'token_url': 'api.amazon.co.uk/auth/o2/token'
-    }
     AE = {
         'sandbox': 'advertising-api-test.amazon.com',
         'prod': 'advertising-api-eu.amazon.com',
-        'currency': 'EUR',
+        'currency': 'AED',
         'token_url': 'api.amazon.co.uk/auth/o2/token'
     }
     
     def __init__(self, info):
-        
         config = dotenv_values(".env")
-        AWS_ENVIRONMENT = config.get('AWS_ENV') or os.environ.get('API_PASSWORD')
+        AWS_ENVIRONMENT = os.environ.get('AWS_ENV') or config.get('AWS_ENV')
         if AWS_ENVIRONMENT == "PRODUCTION":
             self.region_url = info.get('prod')
         else:
             self.region_url = info.get('sandbox')
-        
+
         self.endpoint = 'https://{}'.format(self.region_url)
         self.currency = info.get('currency')
