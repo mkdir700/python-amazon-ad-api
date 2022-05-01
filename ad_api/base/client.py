@@ -15,8 +15,7 @@ from io import BytesIO
 import gzip
 from zipfile import ZipFile
 import zipfile
-
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 
 
 log = logging.getLogger(__name__)
@@ -60,7 +59,7 @@ class Client(BaseClient):
         location = params.get("url")
 
         try:
-            r = requests.get(location, headers=self.headers, data=None, allow_redirects=True)
+            r = requests.get(location, headers=headers or self.headers, data=None, allow_redirects=True)
 
         except requests.exceptions.InvalidSchema as e:
             error = {
@@ -97,7 +96,8 @@ class Client(BaseClient):
 
         if name is None:
             o = urlparse(r.url)
-            name = o.path[1:o.path.find('.')]
+            file_name = o.path[1:o.path.find('.')]
+            name = file_name.replace("/", "-")
 
         if mode == "raw":
 
@@ -140,6 +140,23 @@ class Client(BaseClient):
                 fo.close()
                 next_token = None
                 return ApiResponse(name + ".json", next_token, headers=r.headers)
+
+        elif mode == "csv":
+            if bytes[0:2] == b'\x1f\x8b':
+                buf = BytesIO(bytes)
+                f = gzip.GzipFile(fileobj=buf)
+                read_data = f.read()
+                fo = open(name + ".csv", 'w')
+                fo.write(read_data.decode('utf-8'))
+                fo.close()
+                next_token = None
+                return ApiResponse(name + ".csv", next_token, headers=r.headers)
+            else:
+                fo = open(name + ".csv", 'w')
+                fo.write(r.text)
+                fo.close()
+                next_token = None
+                return ApiResponse(name + ".csv", next_token, headers=r.headers)
 
         elif mode == "gzip":
             fo = gzip.open(name + ".json.gz", 'wb').write(r.content)
@@ -229,7 +246,21 @@ class Client(BaseClient):
 
         if self.debug:
             logging.info(headers or self.headers)
-            logging.info(method + " " + self.endpoint + path)
+
+            # logging.info(params)
+            # logging.info(type(params))
+
+            if params:
+                str_query = ""
+                for key, value in params.items():
+                    # logging.info(key)
+                    # logging.info(value)
+                    str_query += key + "=" + quote(str(value))
+                message = method + " " + self.endpoint + path + "?" + str_query
+            else:
+                message = method + " " + self.endpoint + path
+
+            logging.info(message)
             if data is not None:
                 logging.info(data)
 
@@ -250,11 +281,30 @@ class Client(BaseClient):
             exception = get_exception_for_content(dictionary)
             raise exception(dictionary)
 
+        if type(str_content) is str and str_content[0:15] == 'Invalid request' and vars(res).get('_content_consumed') is True:
+            dictionary = {"status_code": vars(res).get('status_code'), "msg": str_content}
+            exception = get_exception_for_content(dictionary)
+            raise exception(dictionary)
+
         data = json.loads(str_content)
 
         if type(data) is dict and data.get('code') == 'UNAUTHORIZED':
             exception = get_exception_for_content(data)
             raise exception(data)
+
+        if type(data) is dict and data.get('message') == 'Too Many Requests' and vars(res).get('_content_consumed') is True:
+            exception = get_exception_for_content(data)
+            raise exception(data)
+
+        if type(data) is dict and data.get('code') == 'NOT_FOUND' and vars(res).get('_content_consumed') is True:
+            dictionary = {"status_code": vars(res).get('status_code'), "code": data.get('code'), "details": data.get('details'), "requestId": data.get('requestId')}
+            exception = get_exception_for_content(data)
+            raise exception(dictionary)
+
+        if type(data) is dict and data.get('code') == 'SERVER_IS_BUSY' and vars(res).get('_content_consumed') is True:
+            dictionary = {"status_code": vars(res).get('status_code'), "code": data.get('code'), "details": data.get('details'), "requestId": data.get('requestId')}
+            exception = get_exception_for_content(data)
+            raise exception(dictionary)
 
         if type(data) is dict and data.get('message') == 'Unauthorized' and vars(res).get('_content_consumed') is True:
             dictionary = {"status_code": vars(res).get('status_code'), "message": "Unauthorized"}
@@ -277,7 +327,11 @@ class Client(BaseClient):
             raise exception(dictionary)
 
         if vars(res).get('_content') == b'[]' and vars(res).get('_content_consumed') is True:
-            data = json.loads('{"status_code": 200, "msg": "No Data Available"}')
+            # data = json.loads('{"status_code": 200, "msg": "No Data Available", "payload": "No Data Available"}')
+            data = vars(res).get('_content').decode('utf-8')
+            # dictionary = {"status_code": 200, "message": "No Data Available"}
+            # exception = get_exception_for_content(dictionary)
+            # raise exception(dictionary)
 
         headers = vars(res).get('headers')
         status_code = vars(res).get('status_code')

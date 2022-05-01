@@ -1,12 +1,14 @@
-from ad_api.base import Client, sp_endpoint, fill_query_params, ApiResponse
+from ad_api.base import Client, sp_endpoint, fill_query_params, ApiResponse, Utils
 
 class Metadata(Client):
+    r"""
+    """
 
     @sp_endpoint('/product/metadata', method='POST')
     def get_products_metadata(self, **kwargs) -> ApiResponse:
         r"""
 
-        get_products_metadata(self, **kwargs) -> ApiResponse
+        get_products_metadata(body: (dict, str)) -> ApiResponse
 
         Returns product metadata for the advertiser.
 
@@ -41,4 +43,7 @@ class Metadata(Client):
             ApiResponse
 
         """
-        return self._request(kwargs.pop('path'), data=kwargs.pop('body'), params=kwargs)
+        contentType = 'application/vnd.productmetadatarequest.v1+json'
+        headers = {'Content-Type': contentType}
+        body = Utils.convert_body(kwargs.pop('body'), wrap=False)
+        return self._request(kwargs.pop('path'), data=body, params=kwargs, headers=headers)
