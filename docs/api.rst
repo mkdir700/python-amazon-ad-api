@@ -15,3 +15,5 @@ Common Resources
     api/audiences
     api/portfolios
     api/insights
+    api/reports
+    api/validation_configurations
